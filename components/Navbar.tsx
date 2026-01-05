@@ -24,16 +24,17 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${scrolled ? 'py-4' : 'py-8'}`}>
-      <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-6 relative flex items-center justify-center min-h-[40px]">
+        {/* Logo - Positioned to the left */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-xl font-bold tracking-tighter text-black"
+          className="absolute left-6 text-xl font-bold tracking-tighter text-black"
         >
           HGS<span className="text-blue-600">.</span>
         </motion.div>
 
-        {/* Desktop Links */}
+        {/* Desktop Links - Centered */}
         <div className="hidden md:flex items-center space-x-1 glass px-6 py-2 rounded-full">
           {navLinks.map((link) => (
             <a 
@@ -46,13 +47,9 @@ const Navbar: React.FC = () => {
           ))}
         </div>
 
-        <button className="hidden md:block px-6 py-2 bg-black text-white text-sm font-bold rounded-full hover:bg-blue-600 transition-all">
-          Resume
-        </button>
-
-        {/* Mobile Toggle */}
+        {/* Mobile Toggle - Positioned to the right */}
         <button 
-          className="md:hidden glass p-2 rounded-lg text-black"
+          className="md:hidden absolute right-6 glass p-2 rounded-lg text-black"
           onClick={() => setIsOpen(!isOpen)}
         >
           {isOpen ? <X size={20} /> : <Menu size={20} />}
@@ -79,9 +76,6 @@ const Navbar: React.FC = () => {
                   {link.name}
                 </a>
               ))}
-              <button className="w-full py-3 bg-black text-white font-bold rounded-xl">
-                Resume
-              </button>
             </div>
           </motion.div>
         )}
