@@ -4,55 +4,53 @@ import { motion } from 'framer-motion';
 import { SKILL_GROUPS } from '../constants';
 
 const Skills: React.FC = () => {
-  // Balanced position calculation for a more compact, screen-fitting layout
+  // Balanced position calculation for a more expansive, immersive layout
   const skillPositions = useMemo(() => {
-    // Scaled down radii to fit better within a standard viewport height
-    const ringRadiiBase = [300, 420, 540, 660]; 
+    // Adjusted radii to be more responsive and avoid screen edges
+    const ringRadiiBase = [200, 320, 440, 560]; 
     
     return SKILL_GROUPS.map((group, groupIdx) => {
       const radius = ringRadiiBase[groupIdx];
       const total = group.skills.length;
       
-      // Arc distribution logic remains robust but tighter
-      const ringOffset = groupIdx * 12; 
-      const startAngle = 175 + ringOffset;
-      const endAngle = 365 + ringOffset;
-      const angleRange = endAngle - startAngle;
+      // Spread across the full 360 degrees
+      const startAngle = (groupIdx * 45); 
+      const angleRange = 360;
       
       return group.skills.map((skill, skillIdx) => {
-        const angleStep = total > 1 ? angleRange / (total - 1) : 0;
+        const angleStep = total > 0 ? angleRange / total : 0;
         const currentAngle = startAngle + (skillIdx * angleStep);
         
-        // Controlled noise
-        const jitter = (Math.random() - 0.5) * 6;
+        // Controlled noise for an organic "cloud" feel
+        const jitter = (Math.random() - 0.5) * 15;
         const rad = ((currentAngle + jitter) * Math.PI) / 180;
         
-        // Slightly flatter ellipse (0.4) for a more widescreen focus
+        // Ensure x and y stay within reasonable bounds
         const x = Math.cos(rad) * radius;
-        const y = Math.sin(rad) * (radius * 0.4); 
+        const y = Math.sin(rad) * (radius * 0.55); 
         
         return { skill, x, y, groupIdx };
       });
     }).flat();
   }, []);
 
-  const ringRadii = [300, 420, 540, 660];
+  const ringRadii = [200, 320, 440, 560];
 
   return (
     <section className="relative py-32 px-6 lg:px-24 bg-[#fdfdfd] overflow-hidden min-h-screen flex flex-col items-center justify-center">
       
-      {/* Background Decorative Rings */}
-      <div className="absolute top-[50%] left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+      {/* Background Decorative Rings - Centered but with a slight right shift for nav gutter */}
+      <div className="absolute top-[50%] left-[55%] md:left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none opacity-50">
         {ringRadii.map((radius, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 2, delay: i * 0.1 }}
+            transition={{ duration: 2, delay: i * 0.15, ease: "easeOut" }}
             style={{ 
               width: radius * 2, 
-              height: radius * 0.8, // Adjusted height for compact look
-              border: '1px solid rgba(0,0,0,0.02)'
+              height: radius * 1.1, 
+              border: '1px solid rgba(0,0,0,0.03)'
             }}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-[100%]"
           />
@@ -66,7 +64,7 @@ const Skills: React.FC = () => {
           whileInView={{ opacity: 1, y: 0 }}
           className="text-[9px] font-bold uppercase tracking-[0.8em] text-blue-600 mb-6"
         >
-          04 // Technical Ecosystem
+          Technical Ecosystem
         </motion.div>
         
         <div className="relative inline-block mb-8">
@@ -77,7 +75,7 @@ const Skills: React.FC = () => {
           >
             Core <span className="text-black/5 italic">Arsenal.</span>
           </motion.h2>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl animate-pulse -z-10" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl animate-pulse -z-10" />
         </div>
 
         <motion.p 
@@ -90,8 +88,8 @@ const Skills: React.FC = () => {
         </motion.p>
       </div>
 
-      {/* The Orbiting Skill Cloud */}
-      <div className="absolute top-[50%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[1600px] h-[600px] pointer-events-none">
+      {/* The Orbiting Skill Cloud - Centered with Gutter awareness */}
+      <div className="absolute top-[50%] left-[55%] md:left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none">
         {skillPositions.map(({ skill, x, y, groupIdx }, i) => (
           <motion.div
             key={`${skill}-${i}`}
@@ -102,7 +100,7 @@ const Skills: React.FC = () => {
               type: "spring", 
               stiffness: 80, 
               damping: 20, 
-              delay: i * 0.01 
+              delay: i * 0.008 
             }}
             style={{
               left: `calc(50% + ${x}px)`,
@@ -112,24 +110,25 @@ const Skills: React.FC = () => {
           >
             <motion.div
               animate={{
-                y: [0, -10, 0],
-                x: [0, 4, 0],
+                y: [0, -12, 0],
+                x: [0, 6, 0],
               }}
               transition={{
-                duration: 5 + Math.random() * 3,
+                duration: 6 + Math.random() * 4,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
               className="group"
             >
-              {/* Skill Node - Optimized for smaller size */}
-              <div className="px-5 py-2.5 glass bg-white/60 border border-black/[0.02] rounded-full whitespace-nowrap shadow-[0_15px_40px_-15px_rgba(0,0,0,0.03)] hover:border-blue-500/40 hover:bg-white hover:scale-110 transition-all duration-500 flex items-center space-x-2.5 interactive cursor-none">
-                <div className={`w-1.5 h-1.5 rounded-full ${
+              <div className="px-5 py-2.5 glass bg-white/70 border border-black/[0.03] rounded-full whitespace-nowrap shadow-[0_15px_40px_-15px_rgba(0,0,0,0.04)] hover:border-blue-500/50 hover:bg-white hover:scale-115 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.1)] transition-all duration-500 flex items-center space-x-2.5 interactive cursor-none">
+                <div className={`w-2 h-2 rounded-full ${
                   groupIdx === 0 ? 'bg-blue-500' : 
                   groupIdx === 1 ? 'bg-emerald-500' : 
                   groupIdx === 2 ? 'bg-indigo-500' : 'bg-cyan-500'
-                }`} />
-                <span className="text-[11px] font-bold text-black/50 group-hover:text-black uppercase tracking-[0.2em] transition-colors">{skill}</span>
+                } group-hover:scale-125 transition-transform`} />
+                <span className="text-[11px] font-bold text-black/50 group-hover:text-black uppercase tracking-[0.2em] transition-colors">
+                  {skill}
+                </span>
               </div>
             </motion.div>
           </motion.div>
@@ -137,10 +136,10 @@ const Skills: React.FC = () => {
       </div>
 
       {/* Bottom Legend */}
-      <div className="mt-12 flex flex-wrap justify-center gap-x-12 gap-y-4 opacity-25 px-6 pb-4">
+      <div className="absolute bottom-12 flex flex-wrap justify-center gap-x-12 gap-y-4 opacity-30 px-6">
         {SKILL_GROUPS.map((group, i) => (
           <div key={i} className="flex items-center space-x-3">
-             <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-emerald-500' : i === 2 ? 'bg-indigo-500' : 'bg-cyan-500'}`} />
+             <div className={`w-2 h-2 rounded-full ${i === 0 ? 'bg-blue-500' : i === 1 ? 'bg-emerald-500' : i === 2 ? 'bg-indigo-500' : i === 3 ? 'bg-cyan-500' : 'bg-black'}`} />
              <span className="text-[9px] font-black uppercase tracking-[0.3em]">{group.category}</span>
           </div>
         ))}

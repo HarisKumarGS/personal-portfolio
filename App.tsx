@@ -44,25 +44,41 @@ const App: React.FC = () => {
       );
     });
 
-    // Sequential Sticky Slide Transitions - COZYDIADORA style
-    // High-end stacking effect: Current section slides up and scales down slightly, 
-    // Next section slides up from the bottom with full opacity.
+    // Sequential Sticky Slide Transitions
     if (containerRef.current && heroRef.current && aboutRef.current && expertiseRef.current) {
-      const totalSlides = 3 + PROJECTS.length;
+      const totalSlides = 3 + PROJECTS.length; // Hero + About + Expertise + Projects
+      
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: containerRef.current,
           start: "top top",
           end: `+=${totalSlides * 100}%`,
-          scrub: 0.8, // Slightly smoother scrub for weightier feel
+          scrub: 0.8,
           pin: true,
           anticipatePin: 1,
+          onUpdate: (self) => {
+            // Update progress indicators based on current slide
+            const progress = self.progress;
+            const slideIndex = Math.floor(progress * totalSlides);
+            
+            for (let i = 0; i < totalSlides; i++) {
+              const indicator = document.getElementById(`indicator-${i}`);
+              if (indicator) {
+                // Determine scale based on whether the slide is active, past, or future
+                let scale = 0;
+                if (i < slideIndex) scale = 1;
+                else if (i === slideIndex) {
+                  // Percentage of current slide completed
+                  scale = (progress * totalSlides) % 1;
+                }
+                indicator.style.transform = `scaleY(${scale})`;
+              }
+            }
+          }
         }
       });
 
-      // Unified transition helper to maintain consistent 'Antigravity' physics
       const transitionBetween = (prev: HTMLElement, next: HTMLElement, phase: number) => {
-        // Prev section moves out: slide up slightly and scale down
         tl.to(prev, {
           y: "-30%",
           scale: 0.92,
@@ -71,11 +87,10 @@ const App: React.FC = () => {
           ease: "power4.inOut"
         }, phase);
 
-        // Next section moves in: slide up from bottom
         tl.fromTo(next,
           { 
             y: "100%", 
-            opacity: 1, // Start with full opacity for stacking feel
+            opacity: 1,
             scale: 1.05 
           },
           { 
@@ -88,13 +103,13 @@ const App: React.FC = () => {
         );
       };
 
-      // Phase 0 -> 1: Hero to About
+      // 0 -> 1: Hero to About
       transitionBetween(heroRef.current, aboutRef.current, 0);
-
-      // Phase 1 -> 2: About to Expertise
+      
+      // 1 -> 2: About to Expertise
       transitionBetween(aboutRef.current, expertiseRef.current, 1);
 
-      // Phase 2 -> 3+: Project Slides
+      // 2 onwards: Expertise to Projects sequence
       PROJECTS.forEach((_, index) => {
         const currentRef = projectRefs.current[index];
         const prevRef = index === 0 ? expertiseRef.current : projectRefs.current[index - 1];
@@ -119,58 +134,65 @@ const App: React.FC = () => {
       <div className="relative z-10">
         <Navbar />
         
-        {/* Progress Indicator - Sticky */}
-        <div className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col space-y-4 z-50 pointer-events-none hidden lg:flex">
+        {/* Progress Indicator - Increased z-index to stay above content */}
+        <div className="fixed left-6 top-1/2 -translate-y-1/2 flex flex-col space-y-4 z-[100] pointer-events-none hidden lg:flex">
             {[...Array(3 + PROJECTS.length)].map((_, i) => (
                 <div key={i} className="w-1 h-8 bg-black/10 rounded-full overflow-hidden relative">
-                    <div className={`absolute inset-0 bg-blue-600 origin-top transition-transform duration-500 scale-y-0`} id={`indicator-${i}`}></div>
+                    <div 
+                      className="absolute inset-0 bg-blue-600 origin-top transition-transform duration-300 scale-y-0" 
+                      id={`indicator-${i}`}
+                    ></div>
                 </div>
             ))}
         </div>
 
         <div ref={containerRef} className="relative h-screen w-full overflow-hidden">
-          {/* Hero Slide */}
+          {/* Slide 0: Hero */}
           <div ref={heroRef} className="absolute inset-0 z-10 will-change-transform">
             <Hero />
           </div>
           
-          {/* About Slide */}
-          <div ref={aboutRef} className="absolute inset-0 z-20 opacity-0 pointer-events-none will-change-transform">
+          {/* Slide 1: About Section - The Narrative */}
+          <div id="about" ref={aboutRef} className="absolute inset-0 z-20 opacity-0 pointer-events-none will-change-transform">
             <div className="pointer-events-auto h-full w-full">
               <About />
             </div>
           </div>
           
-          {/* Expertise Slide */}
-          <div ref={expertiseRef} className="absolute inset-0 z-30 opacity-0 pointer-events-none will-change-transform">
+          {/* Slide 2: Skills Section - Expertise */}
+          <div id="skills" ref={expertiseRef} className="absolute inset-0 z-30 opacity-0 pointer-events-none will-change-transform">
             <div className="pointer-events-auto h-full w-full">
               <Expertise />
             </div>
           </div>
 
-          {/* Individual Project Slides */}
-          {PROJECTS.map((project, index) => (
-            <div 
-              key={project.id} 
-              ref={(el) => { projectRefs.current[index] = el; }} 
-              className="absolute inset-0 z-[40] opacity-0 pointer-events-none will-change-transform"
-            >
-              <div className="pointer-events-auto h-full w-full">
-                <ProjectSlide project={project} />
+          {/* Slides 3+: Projects Section */}
+          <div id="projects">
+            {PROJECTS.map((project, index) => (
+              <div 
+                key={project.id} 
+                ref={(el) => { projectRefs.current[index] = el; }} 
+                className="absolute inset-0 z-[40] opacity-0 pointer-events-none will-change-transform"
+              >
+                <div className="pointer-events-auto h-full w-full">
+                  <ProjectSlide project={project} />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <section className="post-sticky relative z-[60]">
+        {/* Post-sticky: Core Skills Section - Orbital Arsenal */}
+        <section id="core-skills" className="post-sticky relative z-[60]">
           <Skills />
         </section>
-        <section className="post-sticky relative z-[60]">
+        
+        {/* Post-sticky: Contact Section - Footer */}
+        <section id="contact" className="post-sticky relative z-[60]">
           <Footer />
         </section>
       </div>
 
-      {/* Global Background Accents */}
       <div className="fixed inset-0 z-[1] pointer-events-none">
         <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100/30 blur-[180px] -translate-y-1/2 translate-x-1/2 rounded-full" />
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-emerald-100/30 blur-[180px] translate-y-1/2 -translate-x-1/2 rounded-full" />
